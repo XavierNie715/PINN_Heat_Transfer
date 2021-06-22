@@ -24,40 +24,36 @@ class PINN(object):
 
 
         # data
-        [self.x_data, self.y_data, self.T_data] = [x_data, y_data, T_data]
+        [self.t_data, self.x_data, self.T_data] = [t_data, x_data, T_data]
 
-        [self.x_L, self.y_L, self.T_L] = [x_L, y_L, T_L]
-        [self.x_R, self.y_R, self.T_R] = [x_R, y_R, T_R]
-        [self.x_U, self.y_U, self.T_U] = [x_U, y_U, T_U]
-        [self.x_D, self.y_D, self.T_D] = [x_D, y_D, T_D]
+        [self.t_U, self.x_U, self.T_U] = [t_U, x_U, T_U]
+        [self.t_D, self.x_D, self.T_D] = [t_D, x_D, T_D]
+        [self.t_I, self.x_I, self.T_I] = [t_I, x_I, T_I]
 
         # placeholders
-        [self.x_data_tf, self.y_data_tf, self.T_data_tf] = \
+        [self.t_data_tf, self.x_data_tf, self.T_data_tf] = \
             [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
 
-        [self.x_L_tf, self.y_L_tf, self.T_L_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
-        [self.x_R_tf, self.y_R_tf, self.T_R_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
-        [self.x_U_tf, self.y_U_tf, self.T_U_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
-        [self.x_D_tf, self.y_D_tf, self.T_D_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
+        [self.t_U_tf, self.x_U_tf, self.T_U_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
+        [self.t_D_tf, self.x_D_tf, self.T_D_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
+        [self.t_I_tf, self.x_I_tf, self.T_I_tf] = [tf.placeholder(tf.float32, shape=[None, 1]) for _ in range(3)]
 
         # neural networks
-        self.net_T = neural_net(self.x_data, self.y_data, layers=self.layers)
+        self.net_T = neural_net(self.t_data, self.x_data, layers=self.layers)
 
-        self.T_data_pred = self.net_T(self.x_data_tf, self.y_data_tf)
+        self.T_data_pred = self.net_T(self.t_data_tf, self.x_data_tf)
 
-        # neural networks data at the B.C.
-        self.T_L_pred = self.net_T(self.x_L_tf, self.y_L_tf)
-        self.T_R_pred = self.net_T(self.x_R_tf, self.y_R_tf)
-        self.T_U_pred = self.net_T(self.x_U_tf, self.y_U_tf)
-        self.T_D_pred = self.net_T(self.x_D_tf, self.y_D_tf)
+        # neural networks data at the B.C. && I.C.
+        self.T_U_pred = self.net_T(self.t_U_tf, self.x_U_tf)
+        self.T_D_pred = self.net_T(self.t_D_tf, self.x_D_tf)
+        self.T_I_pred = self.net_T(self.t_I_tf, self.x_I_tf)
 
-        self.e_pred = condution_2D_error(self.T_data_pred, self.x_data_tf, self.y_data_tf, )
+        self.e_pred = transient_1D_error(self.T_data_pred, self.t_data_tf, self.x_data_tf)
 
         # loss
-        self.loss = mean_squared_error(self.T_L_pred, self.T_L_tf) + \
-                    mean_squared_error(self.T_R_pred, self.T_R_tf) + \
-                    mean_squared_error(self.T_U_pred, self.T_U_tf) + \
+        self.loss = mean_squared_error(self.T_U_pred, self.T_U_tf) + \
                     mean_squared_error(self.T_D_pred, self.T_D_tf) + \
+                    mean_squared_error(self.T_I_pred, self.T_I_tf) + \
                     mean_squared_error(self.e_pred, 0.0)
 
         # optimizers
@@ -69,7 +65,7 @@ class PINN(object):
 
     def train(self, total_time, learning_rate):
 
-        N_data = self.T_data.shape[0]  # 坐标
+        N_data = self.t_data.shape[0]  # 坐标
 
         start_time = time.time()
         begin_time = time.time()
@@ -81,10 +77,10 @@ class PINN(object):
             # for randomly choose data batch
             idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
 
-            (x_data_batch,
-             y_data_batch,
-             T_data_batch) = (self.x_data[idx_data, :],
-                              self.y_data[idx_data, :],
+            (t_data_batch,
+             x_data_batch,
+             T_data_batch) = (self.t_data[idx_data, :],
+                              self.x_data[idx_data, :],
                               self.T_data[idx_data, :])
 
             tf_dict = {self.x_data_tf: x_data_batch,
@@ -129,8 +125,8 @@ class PINN(object):
                 T_pred = 0 * T_star
                 T_pred = model.predict(x_star, y_star)
                 error_T = relative_error(T_pred, T_star)
-                print('**************Error c: %e, Running Time: %.2fmin**************'
-                      % (error_T, ((time.time() - begin_time) / 60)))
+                print('**************It: %d, Error c: %e**************'
+                      % (it, error_T))
                 f = open("./Results/error.txt", "a")  # 存error
                 f.write("error_T: {:.3e}".format(error_T))
 

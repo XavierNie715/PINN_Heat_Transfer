@@ -135,7 +135,7 @@ class PINN(object):
                 f = open("./Results/error.txt", "a")  # 存error
                 f.write("error_T: {:.3e}".format(error_T))
 
-                scipy.io.savemat('./Results/Conduction2D_results_%s.mat' % (time.strftime('%d_%m_%Y')),
+                scipy.io.savemat('./Results/Conduction2D_100_results_%s.mat' % (time.strftime('%d_%m_%Y')),
                                  {'T_pred': T_pred})
 
             # shutdown train
@@ -154,12 +154,12 @@ class PINN(object):
 
 if __name__ == "__main__":
 
-    batch_size = 30000
+    batch_size = 10000
 
     layers = [2] + 10 * [1 * 50] + [1]  # input * layers * [output * neurons] * output
 
     # Load Data
-    data = scipy.io.loadmat('./Data/2d_conduction.mat')
+    data = scipy.io.loadmat('./Data/2d_conduction_100.mat')
 
     x_star = data['x_star'] # N x 1
     y_star = data['y_star'] # N x 1
@@ -224,4 +224,4 @@ if __name__ == "__main__":
 
     f.write("error_T: {:.3e}".format(error_T))
 
-    scipy.io.savemat('./Results/Conduction2D_results_%s.mat' % (time.strftime('%d_%m_%Y')), {'T_pred': T_pred})
+    scipy.io.savemat('./Results/Conduction2D_100_results_%s.mat' % (time.strftime('%d_%m_%Y')), {'T_pred': T_pred})

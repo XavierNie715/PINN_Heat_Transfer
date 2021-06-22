@@ -107,3 +107,18 @@ def condution_2D_error(T, x, y):
     e = T_xx + T_yy
 
     return e
+
+
+def transient_1D_error(T, t, x):
+    Y = tf.concat(T, 1)
+
+    Y_x = fwd_gradients(Y, x)
+    Y_t = fwd_gradients(Y, t)
+    Y_xx = fwd_gradients(Y_x, x)
+
+    T_xx = Y_xx[:, 0:1]
+    T_t = Y_t[:, 0:1]
+
+    e = T_xx - T_t
+
+    return e
