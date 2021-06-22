@@ -3,9 +3,11 @@ import numpy as np
 import scipy.io
 import time
 import sys
+import os
 
 from Utilities.utilities import neural_net, tf_session, mean_squared_error, relative_error, transient_1D_error
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 class PINN(object):
 
