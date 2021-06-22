@@ -130,10 +130,11 @@ class PINN(object):
                 T_pred = 0 * T_star
                 T_pred = model.predict(x_star, y_star)
                 error_T = relative_error(T_pred, T_star)
-                print('**************It: %d, Error c: %e**************'
+                print('**************It: %d, Error T: %e**************'
                       % (it, error_T))
                 f = open("./Results/error.txt", "a")  # 存error
-                f.write("error_T: {:.3e}".format(error_T))
+                f.write("It: {} ".format(it))
+                f.write("error_T: {:.3e}\n".format(error_T))
 
                 scipy.io.savemat('./Results/Conduction2D_100_results_%s.mat' % (time.strftime('%d_%m_%Y')),
                                  {'T_pred': T_pred})
