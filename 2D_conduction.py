@@ -131,9 +131,9 @@ class PINN(object):
                 T_pred = model.predict(x_star, y_star)
                 print('*******************T_pred', T_pred)
                 error_T = relative_error(T_pred, T_star)
-                print(print('####################error_T', error_T))
-                print('**************It: %d, Error c: %e**************'
-                      % (it, error_T))
+                print('###################error_T', error_T)
+                # print('**************It: %d, Error c: %e**************'
+                #       % (it, error_T))
                 f = open("./Results/error.txt", "a")  # 存error
                 # f.write("error_T: {:.3e}".format(error_T))
 
