@@ -147,7 +147,7 @@ if __name__ == "__main__":
     layers = [2] + 10 * [1 * 50] + [1]  # input * layers * [output * neurons] * output
 
     # Load Data
-    data = scipy.io.loadmat('./Data/1d_transient.mat')
+    data = scipy.io.loadmat('./Data/1d_transient_100.mat')
 
     tau_star = data['tau_star'] # T x 1 (T = N)
     x_star = data['x_star'] # N x 1
