@@ -1,6 +1,6 @@
 ## Use PINN to solve heat condution problems.
 
-## PINN is originally proposed by Maziarraissi, please check the information below for more details.
+ PINN is originally proposed by Maziarraissi, please check the information below for more details.
 
 
 # [Physics Informed Neural Networks](https://maziarraissi.github.io/PINNs/)
