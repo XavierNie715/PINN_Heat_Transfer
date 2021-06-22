@@ -35,21 +35,6 @@ def fwd_gradients(Y, x):
     return Y_x
 
 
-def Gradient_Velocity_2D(u, v, x, y):
-    Y = tf.concat([u, v], 1)
-
-    Y_x = fwd_gradients(Y, x)
-    Y_y = fwd_gradients(Y, y)
-
-    u_x = Y_x[:, 0:1]
-    v_x = Y_x[:, 1:2]
-
-    u_y = Y_y[:, 0:1]
-    v_y = Y_y[:, 1:2]
-
-    return [u_x, v_x, u_y, v_y]
-
-
 class neural_net(object):
     def __init__(self, *inputs, layers):
 

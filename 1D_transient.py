@@ -12,10 +12,9 @@ class PINN(object):
     def __init__(self, t_data, x_data, T_data,
 
                  # B.C. && I.C.
-                 t_L, x_L, T_L,
-                 x_R, y_R, T_R,
-                 x_U, y_U, T_U,
-                 x_D, y_D, T_D,
+                 t_U, x_U, T_U,
+                 t_D, x_D, T_D,
+                 t_I, x_I, T_I,
 
                  layers, batch_size):
 
@@ -126,7 +125,7 @@ class PINN(object):
                 f.write("Loss: {:.3e}\n".format(loss_value))
 
             # print error && save
-            if ((begin_time-time.time()) / 60) % 3 == 0:
+            if it % 1000 == 0:
                 T_pred = 0 * T_star
                 T_pred = model.predict(x_star, y_star)
                 error_T = relative_error(T_pred, T_star)
