@@ -88,9 +88,9 @@ class PINN(object):
                               self.y_data[idx_data, :],
                               self.T_data[idx_data, :])
 
-            tf_dict = {self.x_data_tf: self.x_data_batch,
-                       self.y_data_tf: self.y_data_batch,
-                       self.T_data_tf: self.T_data_batch,
+            tf_dict = {self.x_data_tf: x_data_batch,
+                       self.y_data_tf: y_data_batch,
+                       self.T_data_tf: T_data_batch,
 
                        self.x_L_tf: self.x_L,
                        self.y_L_tf: self.y_L,
