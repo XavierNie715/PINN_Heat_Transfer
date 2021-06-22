@@ -132,7 +132,7 @@ class PINN(object):
 
 if __name__ == "__main__":
 
-    layers = [2] + 10 * [4 * 50] + [1]
+    layers = [2] + 10 * [1 * 50] + [1]  # input * layers * [output * neurons] * output
 
     # Load Data
     data = scipy.io.loadmat('./Data/2d_conduction.mat')
