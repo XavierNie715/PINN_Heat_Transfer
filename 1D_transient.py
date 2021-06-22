@@ -173,8 +173,8 @@ if __name__ == "__main__":
     N_data = N  # int(sys.argv[2])
     idx_tau = np.concatenate([np.array([0]), np.random.choice(TAU - 2, TAU_data - 2, replace=False) + 1, np.array([TAU - 1])])
     idx_x = np.random.choice(N, N_data, replace=False)
-    tau_data = tau_star[:, idx_tau][idx_x, :].flatten()[: , None]
-    x_data = x_star[:, idx_tau][idx_x, :].flatten()[: , None]
+    tau_data = TAU_star[:, idx_tau][idx_x, :].flatten()[: , None]
+    x_data = X_star[:, idx_tau][idx_x, :].flatten()[: , None]
     T_data = T_star[:, idx_tau][idx_x, :].flatten()[: , None]
 
     # Training Data on B.C. && I.C.
