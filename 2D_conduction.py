@@ -129,9 +129,9 @@ class PINN(object):
             if it % 1000 == 0:
                 T_pred = 0 * T_star
                 T_pred = model.predict(x_star, y_star)
-                print('*******************T_pred', T_pred)
+                print('*******************T_pred', T_pred, type(T_pred))
                 error_T = relative_error(T_pred, T_star)
-                print('###################error_T', error_T)
+                print('###################error_T', error_T, type(error_T))
                 # print('**************It: %d, Error c: %e**************'
                 #       % (it, error_T))
                 f = open("./Results/error.txt", "a")  # 存error
