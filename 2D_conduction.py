@@ -17,10 +17,12 @@ class PINN(object):
                  x_U, y_U, T_U,
                  x_D, y_D, T_D,
 
-                 layers):
+                 layers, batch_size):
+
         # specs
         self.layers = layers
-        # self.batch_size = batch_size
+        self.batch_size = batch_size
+
 
         # data
         [self.x_data, self.y_data, self.T_data] = [x_data, y_data, T_data]
@@ -68,8 +70,7 @@ class PINN(object):
 
     def train(self, total_time, learning_rate):
 
-        # N_data = self.t_data.shape[0]  # 坐标
-        # N_eqns = self.t_eqns.shape[0]  # 坐标
+        N_data = self.T_data.shape[0]  # 坐标
 
         start_time = time.time()
         begin_time = time.time()
@@ -77,24 +78,19 @@ class PINN(object):
         it = 0
 
         while running_time < total_time:
+
             # for randomly choose data batch
+            idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
 
-            # idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
-            # idx_eqns = np.random.choice(N_eqns, self.batch_size)
-            #
-            # (x_data_batch,
-            #  y_data_batch,
-            #  T_data_batch) = (self.x_data[idx_data, :],
-            #                   self.y_data[idx_data, :],
-            #                   self.T_data[idx_data, :])
-            #
-            # (x_eqns_batch,
-            #  y_eqns_batch) = (self.x_eqns[idx_eqns, :],
-            #                   self.y_eqns[idx_eqns, :])
+            (x_data_batch,
+             y_data_batch,
+             T_data_batch) = (self.x_data[idx_data, :],
+                              self.y_data[idx_data, :],
+                              self.T_data[idx_data, :])
 
-            tf_dict = {self.x_data_tf: self.x_data,
-                       self.y_data_tf: self.y_data,
-                       self.T_data_tf: self.T_data,
+            tf_dict = {self.x_data_tf: self.x_data_batch,
+                       self.y_data_tf: self.y_data_batch,
+                       self.T_data_tf: self.T_data_batch,
 
                        self.x_L_tf: self.x_L,
                        self.y_L_tf: self.y_L,
@@ -131,6 +127,8 @@ class PINN(object):
 
 
 if __name__ == "__main__":
+
+    batch_size = 10000
 
     layers = [2] + 10 * [1 * 50] + [1]  # input * layers * [output * neurons] * output
 
@@ -180,7 +178,7 @@ if __name__ == "__main__":
                 x_U, y_U, T_U,
                 x_D, y_D, T_D,
 
-                layers)
+                layers, batch_size)
 
     model.train(total_time=20, learning_rate=1e-3)
 
