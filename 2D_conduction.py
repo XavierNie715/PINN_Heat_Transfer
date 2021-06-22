@@ -111,14 +111,14 @@ class PINN(object):
                        self.learning_rate: learning_rate}
 
             self.sess.run([self.train_op], tf_dict)
+            loss_value = self.sess.run(self.loss, tf_dict)
 
             # Print loss
             if it % 100 == 0:
                 elapsed = time.time() - start_time
                 running_time += elapsed / 3600.0
-                loss_value = self.sess.run(self.loss, tf_dict)
                 print('It: %d, Loss: %.3e, Time: %.2fs, Running Time: %.2fh'
-                      % (it, loss_value, elapsed, (time.time() - begin_time()) / 3600))
+                      % (it, loss_value, elapsed, ((time.time() - begin_time) / 3600)))
                 sys.stdout.flush()
                 start_time = time.time()
                 f = open("./Results/train.txt", "a")  # 记录loss
@@ -130,8 +130,8 @@ class PINN(object):
                 T_pred = 0 * T_star
                 T_pred = model.predict(x_star, y_star)
                 error_T = relative_error(T_pred, T_star)
-                print('Running Time: %.2fh min', '*********Error c: %e' , ' *********'
-                      % (((time.time() - begin_time()) / 3600), error_T))
+                print('**************Error c: %e, Running Time: %.2fmin**************'
+                      % (error_T, ((time.time() - begin_time) / 60)))
                 f = open("./Results/error.txt", "a")  # 存error
                 f.write("error_T: {:.3e}".format(error_T))
 
@@ -143,6 +143,14 @@ class PINN(object):
                 break
 
             it += 1
+
+    def predict(self, x_star, y_star):
+
+        tf_dict = {self.x_data_tf: x_star, self.y_data_tf: y_star}
+        T_star = self.sess.run(self.T_data_pred, tf_dict)
+
+        return T_star
+
 
 if __name__ == "__main__":
 
@@ -199,32 +207,6 @@ if __name__ == "__main__":
                 layers, batch_size)
 
     model.train(total_time=20, learning_rate=1e-3)
-
-
-    # # Test Data
-    # snap = np.array([100])
-    # t_test = T_star[:,snap]
-    # x_test = X_star[:,snap]
-    # y_test = Y_star[:,snap]
-    #
-    # c_test = C_star[:,snap]
-    # u_test = U_star[:,snap]
-    # v_test = V_star[:,snap]
-    # p_test = P_star[:,snap]
-    #
-    # # Prediction
-    # c_pred, u_pred, v_pred, p_pred = model.predict(t_test, x_test, y_test)
-    #
-    # # Error
-    # error_c = relative_error(c_pred, c_test)
-    # error_u = relative_error(u_pred, u_test)
-    # error_v = relative_error(v_pred, v_test)
-    # error_p = relative_error(p_pred - np.mean(p_pred), p_test - np.mean(p_test))
-    #
-    # print('Error c: %e' % (error_c))
-    # print('Error u: %e' % (error_u))
-    # print('Error v: %e' % (error_v))
-    # print('Error p: %e' % (error_p))
 
     ################# Save Data ###########################
 
