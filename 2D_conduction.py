@@ -219,7 +219,7 @@ if __name__ == "__main__":
     # Error
     error_T = relative_error(T_pred, T_star)
 
-    print('Error c: %e' % (error_T))
+    print('Error T: %e' % (error_T))
 
     f = open("./Results/error.txt", "a")  # 存error
 
