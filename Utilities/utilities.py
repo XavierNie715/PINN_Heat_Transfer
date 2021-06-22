@@ -23,9 +23,10 @@ def mean_squared_error(pred, exact):
 
 
 def relative_error(pred, exact):
-    if type(pred) is np.ndarray:
-        return np.sqrt(np.mean(np.square(pred - exact)) / np.mean(np.square(exact - np.mean(exact))))
-    return tf.sqrt(tf.reduce_mean(tf.square(pred - exact)) / tf.reduce_mean(tf.square(exact - tf.reduce_mean(exact))))
+    return np.sqrt(np.mean(np.square(pred - exact)) / np.mean(np.square(exact - np.mean(exact))))
+    # if type(pred) is np.ndarray:
+    #     return np.sqrt(np.mean(np.square(pred - exact)) / np.mean(np.square(exact - np.mean(exact))))
+    # return tf.sqrt(tf.reduce_mean(tf.square(pred - exact)) / tf.reduce_mean(tf.square(exact - tf.reduce_mean(exact))))
 
 
 def fwd_gradients(Y, x):
