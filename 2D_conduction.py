@@ -112,23 +112,41 @@ class PINN(object):
 
             self.sess.run([self.train_op], tf_dict)
 
-            # Print
+            # Print loss
             if it % 100 == 0:
                 elapsed = time.time() - start_time
                 running_time += elapsed / 3600.0
                 loss_value = self.sess.run(self.loss, tf_dict)
                 print('It: %d, Loss: %.3e, Time: %.2fs, Running Time: %.2fh'
-                      % (it, loss_value, elapsed, (begin_time - time.time()) / 3600))
+                      % (it, loss_value, elapsed, (time.time() - begin_time()) / 3600))
                 sys.stdout.flush()
                 start_time = time.time()
                 f = open("./Results/train.txt", "a")  # 记录loss
                 f.write("It: {} ".format(it))
                 f.write("Loss: {:.3e}\n".format(loss_value))
 
+            # print error && save
+            if ((begin_time-time.time()) / 60) % 3 == 0:
+                T_pred = 0 * T_star
+                T_pred = model.predict(x_star, y_star)
+                error_T = relative_error(T_pred, T_star)
+                print('Running Time: %.2fh min', '*********Error c: %e' , ' *********'
+                      % (((time.time() - begin_time()) / 3600), error_T))
+                f = open("./Results/error.txt", "a")  # 存error
+                f.write("error_T: {:.3e}".format(error_T))
+
+                scipy.io.savemat('./Results/Conduction2D_results_%s.mat' % (time.strftime('%d_%m_%Y')),
+                                 {'T_pred': T_pred})
+
+            # shutdown train
+            if loss_value <= 6e-5:
+                break
+
+            it += 1
 
 if __name__ == "__main__":
 
-    batch_size = 10000
+    batch_size = 30000
 
     layers = [2] + 10 * [1 * 50] + [1]  # input * layers * [output * neurons] * output
 
