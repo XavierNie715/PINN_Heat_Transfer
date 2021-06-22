@@ -97,6 +97,10 @@ class PINN(object):
                        self.x_D_tf: self.x_D,
                        self.T_D_tf: self.T_D,
 
+                       self.tau_I_tf: self.tau_I,
+                       self.x_I_tf: self.x_I,
+                       self.T_I_tf: self.T_I,
+
                        self.learning_rate: learning_rate}
 
             self.sess.run([self.train_op], tf_dict)
