@@ -8,7 +8,7 @@ import os
 from Utilities.utilities import neural_net, tf_session, mean_squared_error, relative_error, transient_1D_error
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 class PINN(object):
 
