@@ -7,6 +7,7 @@ import os
 
 from Utilities.utilities import neural_net, tf_session, mean_squared_error, relative_error, transient_1D_error
 
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 class PINN(object):
@@ -59,6 +60,14 @@ class PINN(object):
                     mean_squared_error(self.e_pred, 0.0)
 
         # optimizers
+        self.optimizer_LBFGS = tf.contrib.opt.ScipyOptimizerInterface(self.loss,
+                                                                method='L-BFGS-B',
+                                                                options={'maxiter': 50000,
+                                                                         'maxfun': 50000,
+                                                                         'maxcor': 50,
+                                                                         'maxls': 50,
+                                                                         'ftol': 1.0 * np.finfo(float).eps})
+
         self.learning_rate = tf.placeholder(tf.float32, shape=[])
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
         self.train_op = self.optimizer.minimize(self.loss)
@@ -74,36 +83,43 @@ class PINN(object):
         running_time = 0
         it = 0
 
-        while running_time < total_time:
+        while it < 10000:
+            if it < 5000:
+                # for randomly choose data batch
+                idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
 
-            # for randomly choose data batch
-            idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
+                (tau_data_batch,
+                 x_data_batch,
+                 T_data_batch) = (self.tau_data[idx_data, :],
+                                  self.x_data[idx_data, :],
+                                  self.T_data[idx_data, :])
 
-            (tau_data_batch,
-             x_data_batch,
-             T_data_batch) = (self.tau_data[idx_data, :],
-                              self.x_data[idx_data, :],
-                              self.T_data[idx_data, :])
+                tf_dict = {self.tau_data_tf: tau_data_batch,
+                           self.x_data_tf: x_data_batch,
+                           self.T_data_tf: T_data_batch,
 
-            tf_dict = {self.tau_data_tf: tau_data_batch,
-                       self.x_data_tf: x_data_batch,
-                       self.T_data_tf: T_data_batch,
+                           self.tau_U_tf: self.tau_U,
+                           self.x_U_tf: self.x_U,
+                           self.T_U_tf: self.T_U,
 
-                       self.tau_U_tf: self.tau_U,
-                       self.x_U_tf: self.x_U,
-                       self.T_U_tf: self.T_U,
+                           self.tau_D_tf: self.tau_D,
+                           self.x_D_tf: self.x_D,
+                           self.T_D_tf: self.T_D,
 
-                       self.tau_D_tf: self.tau_D,
-                       self.x_D_tf: self.x_D,
-                       self.T_D_tf: self.T_D,
+                           self.tau_I_tf: self.tau_I,
+                           self.x_I_tf: self.x_I,
+                           self.T_I_tf: self.T_I,
 
-                       self.tau_I_tf: self.tau_I,
-                       self.x_I_tf: self.x_I,
-                       self.T_I_tf: self.T_I,
+                           self.learning_rate: learning_rate}
 
-                       self.learning_rate: learning_rate}
+                self.sess.run([self.train_op], tf_dict)
 
-            self.sess.run([self.train_op], tf_dict)
+            else:
+                self.optimizer_LBFGS.minimize(self.sess,
+                                        feed_dict = tf_dict,
+                                        fetches = [self.loss],
+                                        loss_callback = self.callback)
+
             loss_value = self.sess.run(self.loss, tf_dict)
 
             # Print loss
@@ -114,9 +130,9 @@ class PINN(object):
                       % (it, loss_value, elapsed, ((time.time() - begin_time) / 3600)))
                 sys.stdout.flush()
                 start_time = time.time()
-                f = open("./Results/train_1d.txt", "a")  # 记录loss
-                f.write("It: {} ".format(it))
-                f.write("Loss: {:.3e}\n".format(loss_value))
+                # f = open("./Results/train_1d.txt", "a")  # 记录loss
+                # f.write("It: {} ".format(it))
+                # f.write("Loss: {:.3e}\n".format(loss_value))
 
             # print error && save
             if it % 1000 == 0:
@@ -125,18 +141,19 @@ class PINN(object):
                 error_T = relative_error(T_pred, T_star)
                 print('**************It: %d, Error T: %e**************'
                       % (it, error_T))
-                f = open("./Results/error_1d.txt", "a")  # 存error
-                f.write("It: {} ".format(it))
-                f.write("error_T: {:.3e}\n".format(error_T))
-
-                scipy.io.savemat('./Results/Transient1D_results_%s.mat' % (time.strftime('%d_%m_%Y')),
-                                 {'T_pred': T_pred})
+                # f = open("./Results/error_1d.txt", "a")  # 存error
+                # f.write("It: {} ".format(it))
+                # f.write("error_T: {:.3e}\n".format(error_T))
+                #
+                # scipy.io.savemat('./Results/Transient1D_results_%s.mat' % (time.strftime('%d_%m_%Y')),
+                #                  {'T_pred': T_pred})
 
             # shutdown train
             if loss_value <= 6e-5:
                 break
 
             it += 1
+
 
     def predict(self, tau_star, x_star):
 
@@ -220,8 +237,8 @@ if __name__ == "__main__":
 
     print('Error T: %e' % (error_T))
 
-    f = open("./Results/error_1d.txt", "a")  # 存error
-
-    f.write("error_T: {:.3e}".format(error_T))
-
-    scipy.io.savemat('./Results/Transient1D_results_%s.mat' % (time.strftime('%d_%m_%Y')), {'T_pred': T_pred})
+    # f = open("./Results/error_1d.txt", "a")  # 存error
+    #
+    # f.write("error_T: {:.3e}".format(error_T))
+    #
+    # scipy.io.savemat('./Results/Transient1D_results_%s.mat' % (time.strftime('%d_%m_%Y')), {'T_pred': T_pred})
