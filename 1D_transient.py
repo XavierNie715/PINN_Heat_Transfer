@@ -74,6 +74,9 @@ class PINN(object):
 
         self.sess = tf_session()
 
+    def callback(self, loss):
+        print('Loss:', loss)
+
     def train(self, total_time, learning_rate):
 
         N_data = self.tau_data.shape[0]  # 坐标
@@ -115,6 +118,34 @@ class PINN(object):
                 self.sess.run([self.train_op], tf_dict)
 
             else:
+
+                idx_data = np.random.choice(N_data, min(self.batch_size, N_data))
+
+                (tau_data_batch,
+                 x_data_batch,
+                 T_data_batch) = (self.tau_data[idx_data, :],
+                                  self.x_data[idx_data, :],
+                                  self.T_data[idx_data, :])
+
+                tf_dict = {self.tau_data_tf: tau_data_batch,
+                           self.x_data_tf: x_data_batch,
+                           self.T_data_tf: T_data_batch,
+
+                           self.tau_U_tf: self.tau_U,
+                           self.x_U_tf: self.x_U,
+                           self.T_U_tf: self.T_U,
+
+                           self.tau_D_tf: self.tau_D,
+                           self.x_D_tf: self.x_D,
+                           self.T_D_tf: self.T_D,
+
+                           self.tau_I_tf: self.tau_I,
+                           self.x_I_tf: self.x_I,
+                           self.T_I_tf: self.T_I,
+
+                           self.learning_rate: learning_rate}
+
+
                 self.optimizer_LBFGS.minimize(self.sess,
                                         feed_dict = tf_dict,
                                         fetches = [self.loss],
